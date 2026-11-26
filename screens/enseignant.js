@@ -2,7 +2,7 @@
 /*
  * Espace Enseignant — enseignant de démo : Dr Issouf Sawadogo (Algorithmique et bases de données).
  */
-const Ens = { appel: {}, appelSession: null, qr: false, saisie: { ecue: 'INF2411', groupe: 'all', eval: 'CC2' }, devoir: 'dv4', statsEcue: 'INF2411' };
+const Ens = { appel: {}, appelSession: null, saisie: { ecue: 'INF2411', groupe: 'all', eval: 'CC2' }, devoir: 'dv4', statsEcue: 'INF2411' };
 
 function studentsOfGroup(groupe) { return K.promo().filter((s) => groupe === 'all' || s.groupe === groupe).sort((a, b) => a.nom.localeCompare(b.nom, 'fr') || a.prenom.localeCompare(b.prenom, 'fr')); }
 function appelOf(sessionId) { return App.store.appels.find((a) => a.sessionId === sessionId); }
@@ -103,9 +103,9 @@ defineScreen('enseignant', 'appel', {
     const candidates = K.sessionsFor(me, DT.rel(-7), DT.rel(1)).filter((c) => c.statut !== 'annule');
     if (!Ens.appelSession || !candidates.find((c) => c.id === Ens.appelSession)) { const d = defaultAppelSession(me); Ens.appelSession = d ? d.id : null; }
     const c = candidates.find((x) => x.id === Ens.appelSession);
-    const head = UI.pageHead({ title: 'Faire l\'appel', sub: 'Un tap par étudiant, ou appel par QR code.' });
+    const head = UI.pageHead({ title: 'Faire l\'appel', sub: 'Un tap par étudiant, puis validation et verrouillage.' });
     if (!c) return h('div', { class: 'stack-l' }, head, UI.empty({ title: 'Aucune séance à appeler' }));
-    const sel = UI.select(candidates.map((x) => ({ value: x.id, label: sessionLabel(x) + (appelOf(x.id) ? ' — verrouillé' : '') })), c.id, (v) => { Ens.appelSession = v; Ens.qr = false; App.refresh(); }, { 'aria-label': 'Séance', class: 'select' });
+    const sel = UI.select(candidates.map((x) => ({ value: x.id, label: sessionLabel(x) + (appelOf(x.id) ? ' — verrouillé' : '') })), c.id, (v) => { Ens.appelSession = v; App.refresh(); }, { 'aria-label': 'Séance', class: 'select' });
     const students = studentsOfGroup(c.groupe);
     const locked = appelOf(c.id);
     const future = DT.toDate(c.date, c.debut) > new Date(now.getTime() + 15 * 60000);
@@ -125,29 +125,6 @@ defineScreen('enseignant', 'appel', {
       });
     };
     drawRoll(); drawSummary();
-
-    // Appel par QR code : code rafraîchi toutes les 15 s, scans simulés
-    const qrPanel = h('div');
-    const drawQr = () => {
-      clear(qrPanel);
-      if (!Ens.qr || locked) return;
-      let left = 15; let seed = 0;
-      const box = h('div', { class: 'qr-box' }, UI.qr(c.id + '-' + seed));
-      const bar = h('span', { style: { width: '100%' } });
-      const info = h('div', { class: 'small muted center', 'aria-live': 'polite' });
-      qrPanel.appendChild(UI.card({ title: 'Appel par QR code', actions: UI.badge('Code dynamique', 'accent', 'refresh') }, h('div', { class: 'stack', style: { alignItems: 'center' } }, box, h('div', { class: 'qr-timer', 'aria-hidden': 'true' }, bar), info,
-        h('p', { class: 'xsmall muted center' }, 'Les étudiants scannent ce code avec l\'application Kalanso. Il change toutes les 15 secondes et n\'est valable que dans la salle (vérification Wi-Fi du campus).'))));
-      const timer = setInterval(() => {
-        if (!qrPanel.isConnected || !Ens.qr) { clearInterval(timer); return; }
-        left -= 1;
-        bar.style.width = (left / 15 * 100) + '%';
-        if (left <= 0) { left = 15; seed += 1; clear(box).appendChild(UI.qr(c.id + '-' + seed)); }
-        const notYet = students.filter((s) => !state[s.id]);
-        if (notYet.length > 3 && Math.random() < 0.8) { notYet.slice(0, 1 + Math.floor(Math.random() * 3)).forEach((s) => { state[s.id] = 'P'; }); drawRoll(); drawSummary(); }
-        info.textContent = counts().P + ' étudiants ont scanné le code · renouvellement dans ' + left + ' s';
-      }, 1000);
-    };
-    drawQr();
 
     const validate = () => {
       if (!App.guard('appel.faire')) return;
@@ -171,7 +148,7 @@ defineScreen('enseignant', 'appel', {
           }
         });
         App.audit('Appel verrouillé', K.sessionTitle(c) + ' · ' + FMT.date(c.date) + ' ' + c.debut, '', n.P + ' P / ' + n.A + ' A / ' + n.R + ' R', '');
-        Ens.qr = false; api.close(); UI.toast('Appel validé et verrouillé.', 'success'); App.refresh();
+        api.close(); UI.toast('Appel validé et verrouillé.', 'success'); App.refresh();
       } })] });
     };
 
@@ -182,10 +159,9 @@ defineScreen('enseignant', 'appel', {
         future && !locked ? UI.alert('info', null, 'Cette séance n\'a pas encore commencé. Vous pourrez valider l\'appel à partir de ' + FMT.hhmm(c.debut) + '.') : null,
         locked ? UI.alert('success', 'Appel verrouillé', 'Validé le ' + FMT.dateTime(locked.date) + '. Toute correction passe par la Scolarité et est tracée dans le journal d\'audit.') : null)),
       locked ? null : h('div', { class: 'row-between wrap' },
-        h('div', { class: 'row-s wrap' }, UI.button({ label: 'Tous présents', icon: 'checks', variant: 'secondary', onClick: () => { students.forEach((s) => { state[s.id] = 'P'; }); drawRoll(); drawSummary(); } }),
-          UI.button({ label: Ens.qr ? 'Arrêter le QR code' : 'Appel par QR code', icon: 'qr', variant: 'secondary', onClick: () => { Ens.qr = !Ens.qr; drawQr(); } })),
+        h('div', { class: 'row-s wrap' }, UI.button({ label: 'Tous présents', icon: 'checks', variant: 'secondary', onClick: () => { students.forEach((s) => { state[s.id] = 'P'; }); drawRoll(); drawSummary(); } })),
         h('div', { style: { minWidth: '240px', flex: '1 1 240px', maxWidth: '360px' } }, UI.search({ placeholder: 'Rechercher un étudiant', small: true, onInput: (v) => { q = v; drawRoll(); } }).el)),
-      qrPanel, summary, roll,
+      summary, roll,
       locked ? null : h('div', { class: 'form-actions' }, UI.button({ label: 'Valider l\'appel', icon: 'lock', disabled: future, onClick: validate })));
   }
 });

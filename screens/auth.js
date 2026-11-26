@@ -38,6 +38,25 @@ function loomPattern() {
   return svgEl;
 }
 
+/** Accès direct aux 4 espaces de démonstration : un clic = connecté (sans mot de passe ni code SMS). */
+const ROLE_CARDS = {
+  etudiant: { ic: 'graduation', desc: 'Notes, emploi du temps, paiements' },
+  enseignant: { ic: 'pen', desc: 'Appel, saisie des notes, devoirs' },
+  scolarite: { ic: 'building', desc: 'Validation, délibérations, finances' },
+  parent: { ic: 'users', desc: 'Suivi des notes et des absences' }
+};
+function rolePicker() {
+  return h('section', { class: 'role-pick', 'aria-labelledby': 'role-pick-t' },
+    h('div', { class: 'role-pick-head' }, h('h2', { id: 'role-pick-t' }, 'Entrer dans la démo'), h('span', { class: 'xsmall muted' }, 'Un clic, sans mot de passe')),
+    h('div', { class: 'role-grid' }, Object.keys(DEMO_USERS).map((r) => {
+      const u = K.user(DEMO_USERS[r]);
+      const label = ROLE_LABELS[r].replace(' (admin)', '');
+      return h('button', { type: 'button', class: 'role-card', 'data-role': r, onClick: () => { UI.toast('Connecté en tant que ' + K.name(u) + '.', 'success', label); App.login(u.id); } },
+        h('span', { class: 'role-ic' }, icon(ROLE_CARDS[r].ic, 22)),
+        h('span', { class: 'role-txt' }, h('span', { class: 'role-name' }, label), h('span', { class: 'role-who' }, K.name(u)), h('span', { class: 'role-desc' }, ROLE_CARDS[r].desc)));
+    })));
+}
+
 /** Mise en page commune des écrans d'authentification. */
 function authLayout(content) {
   const brand = h('div', { class: 'auth-brand' }, loomPattern(),
@@ -45,7 +64,7 @@ function authLayout(content) {
     h('div', null,
       h('div', { class: 'eyebrow' }, 'Plateforme de vie universitaire'),
       h('h2', null, 'Toute ta vie universitaire au même endroit.'),
-      h('p', { class: 'lead' }, 'Notes LMD, emploi du temps, appel par QR code et paiement des frais par Orange Money ou Moov Money. Conçu pour les universités du Burkina Faso, utilisable avec une connexion lente.')),
+      h('p', { class: 'lead' }, 'Notes LMD, emploi du temps, appel numérique et paiement des frais par Orange Money ou Moov Money. Conçu pour les universités du Burkina Faso, utilisable avec une connexion lente.')),
     h('div', { class: 'facts' },
       h('div', null, h('b', null, 'UE, ECUE, crédits'), h('span', null, 'Compensation et délibérations')),
       h('div', null, h('b', null, 'Mobile money'), h('span', null, 'Reçus et relances par SMS')),
@@ -81,6 +100,8 @@ defineScreen('public', 'bienvenue', {
       h('div', { class: 'auth-mobile-band weave-strip only-mobile', 'aria-hidden': 'true' }),
       h('div', { class: 'row' }, UI.logo(40), h('div', { class: 'brand-name' }, 'Kalanso')),
       h('div', null, h('h1', { tabindex: '-1' }, 'Bienvenue sur Kalanso'), h('p', { class: 'sub', style: { marginBottom: 0 } }, h('span', { class: 'only-mobile' }, 'Toute ta vie universitaire au même endroit. '), 'Choisissez votre établissement pour continuer.')),
+      rolePicker(),
+      h('div', { class: 'or-sep' }, h('span', null, 'ou parcours complet')),
       search.el, list, msg,
       UI.button({ label: 'Continuer', iconRight: 'arrowRight', block: true, onClick: () => App.go('#/connexion') }),
       h('p', { class: 'xsmall muted center' }, 'Première connexion ? ', h('a', { href: '#/premier-acces' }, 'Activer mon compte'))));
@@ -144,13 +165,13 @@ defineScreen('public', 'connexion', {
         App.go('#/otp');
       });
     });
-    const fill = (uidv) => { const u = K.user(uidv); ident.input.value = u.matricule || u.email; pwd.input.value = DEMO_PASSWORD; ident.setError(null); pwd.setError(null); submit.focus(); };
     return authLayout(h('div', { class: 'stack' },
       h('div', { class: 'auth-mobile-band weave-strip only-mobile', 'aria-hidden': 'true' }),
       authHeader('Connexion', 'Accédez à votre espace avec votre matricule ou votre e-mail institutionnel.'),
+      rolePicker(),
+      h('div', { class: 'or-sep' }, h('span', null, 'ou avec un identifiant')),
       form,
-      h('div', { class: 'demo-hint' }, icon('info', 16), h('div', null, h('strong', null, 'Comptes de démonstration. '), 'Mot de passe : ', h('code', null, DEMO_PASSWORD), '. Remplir automatiquement :',
-        h('div', { class: 'chip-row', style: { marginTop: '8px' } }, Object.keys(DEMO_USERS).map((r) => h('button', { type: 'button', class: 'chip', onClick: () => fill(DEMO_USERS[r]) }, ROLE_LABELS[r].replace(' (admin)', '')))))),
+      h('div', { class: 'demo-hint' }, icon('info', 16), h('div', null, h('strong', null, 'Comptes de démonstration. '), 'Mot de passe : ', h('code', null, DEMO_PASSWORD), '. Code SMS : ', h('code', null, DEMO_OTP), '.')),
       h('p', { class: 'xsmall muted center' }, h('a', { href: '#/bienvenue' }, 'Changer d\'établissement'), ' · ', h('a', { href: '#/premier-acces' }, 'Premier accès'))));
   }
 });

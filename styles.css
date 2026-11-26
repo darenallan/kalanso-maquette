@@ -165,6 +165,17 @@ img, svg { display: block; }
 .demo-bar .demo-btn:hover { background: #1F3329; }
 .demo-bar .demo-btn[aria-pressed="true"] { border-color: #34D399; color: #6EE7B7; }
 .demo-bar .demo-spacer { flex: 1; }
+.demo-bar .demo-lbl { color: #A3B5AD; font-size: var(--fs-12); }
+.demo-roles { display: inline-flex; gap: 2px; padding: 2px; border-radius: calc(var(--r-s) + 2px); background: #0A1A14; border: 1px solid #2C463A; flex: none; }
+.demo-bar .demo-role { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border: 0; border-radius: var(--r-s); background: transparent; color: #C9D6CF; font-size: var(--fs-14); font-weight: 500; white-space: nowrap; }
+.demo-bar .demo-role:hover { background: #1F3329; color: #fff; }
+.demo-bar .demo-role[aria-pressed="true"] { background: #34D399; color: #052E1F; font-weight: 600; }
+.demo-bar .demo-btn[hidden] { display: none; }
+/* Outils secondaires en icône seule (libellé en infobulle) pour garder les rôles sur une ligne */
+.demo-bar .demo-btn .lbl-txt { display: none; }
+.demo-bar .demo-btn { padding: 0 8px; }
+.demo-bar #demo-logout { margin-left: -6px; }
+.demo-bar .demo-tools { display: inline-flex; gap: 6px; }
 .demo-bar .demo-note { color: #A3B5AD; font-size: var(--fs-12); }
 .demo-bar :focus-visible { outline-color: #6EE7B7; }
 .demo-bar.is-collapsed { padding: 0; min-height: 0; background: transparent; position: fixed; top: 0; right: 12px; border: 0; }
@@ -675,8 +686,6 @@ h1[tabindex="-1"]:focus { outline: none; }
 .roll-btns button:disabled { cursor: not-allowed; opacity: .7; }
 .qr-box { display: grid; place-items: center; padding: var(--s-4); background: #fff; border-radius: var(--r-m); border: 1px solid var(--border); }
 .qr-box svg { width: 220px; height: 220px; }
-.qr-timer { height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; margin-top: var(--s-3); width: 100%; }
-.qr-timer > span { display: block; height: 100%; background: var(--accent); }
 
 /* ---------- Messagerie ---------- */
 .chat { display: grid; grid-template-columns: minmax(0, 1fr); border: 1px solid var(--border); border-radius: var(--r-m); background: var(--surface); overflow: hidden; height: calc(100vh - 250px); min-height: 460px; }
@@ -744,6 +753,22 @@ h1[tabindex="-1"]:focus { outline: none; }
 .rules { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; font-size: var(--fs-12); color: var(--text-2); }
 .rules li { display: flex; align-items: center; gap: 6px; }
 .rules li.ok { color: var(--success-ink); }
+/* Accès direct aux rôles (écrans Bienvenue et Connexion) */
+.role-pick { display: grid; gap: 10px; padding: 14px; border-radius: var(--r-m); background: var(--accent-soft); border: 1px solid var(--border); }
+.role-pick-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.role-pick-head h2 { margin: 0; font-size: var(--fs-16); color: var(--accent-ink); }
+.role-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.role-card { display: flex; align-items: center; gap: 10px; min-height: 72px; padding: 10px 12px; text-align: left; border-radius: var(--r-s); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); transition: border-color .15s, transform .15s; }
+.role-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.role-card:active { transform: none; }
+.role-ic { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 10px; background: var(--accent-ink); color: var(--on-accent); }
+.role-txt { display: grid; min-width: 0; flex: 1; line-height: 1.25; }
+.role-name { font-weight: 700; font-size: var(--fs-14); }
+.role-who { font-size: var(--fs-12); color: var(--text-2); }
+.role-desc { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+@media (max-width: 420px) { .role-desc { display: none; } .role-card { min-height: 60px; } }
+.or-sep { display: flex; align-items: center; gap: 10px; color: var(--text-2); font-size: var(--fs-12); }
+.or-sep::before, .or-sep::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 .uni-list { max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--r-m); background: var(--surface); }
 .uni-opt { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 0; border-bottom: 1px solid var(--border); background: none; text-align: left; color: inherit; min-height: 64px; }
 .uni-opt:last-child { border-bottom: 0; }
@@ -1019,7 +1044,8 @@ button.nav-link { width: 100%; border: 0; background: none; text-align: left; fo
   .demo-bar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   .demo-bar::-webkit-scrollbar { display: none; }
   .demo-bar .demo-tag { display: none; }
-  .demo-bar select { max-width: 52vw; }
+  .demo-bar .demo-role { padding: 0 8px; }
+  .demo-bar .demo-role svg { display: none; }
   .alert .alert-actions { flex-basis: 100%; }
   .segmented { max-width: 100%; overflow-x: auto; flex-wrap: nowrap; }
   .segmented button { white-space: nowrap; }

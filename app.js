@@ -662,12 +662,17 @@ App.reset = function () {
    ====================================================================== */
 function buildDemoBar() {
   const bar = clear(document.getElementById('demo-bar'));
-  const roleSel = UI.select([{ value: '', label: '— Non connecté —' }].concat(Object.keys(ROLE_LABELS).map((r) => ({ value: r, label: ROLE_LABELS[r] + ' · ' + K.name(K.user(DEMO_USERS[r])) }))),
-    '', (v) => { if (v) App.login(DEMO_USERS[v]); else App.logout(); }, { id: 'demo-role' });
-  roleSel.className = '';
+  const ROLE_ICONS = { etudiant: 'graduation', enseignant: 'pen', scolarite: 'building', parent: 'users' };
+  const roles = h('div', { class: 'demo-roles', role: 'group', 'aria-label': 'Changer de rôle en un clic' }, Object.keys(DEMO_USERS).map((r) => {
+    const label = ROLE_LABELS[r].replace(' (admin)', '');
+    return h('button', { type: 'button', class: 'demo-role', id: 'demo-role-' + r, 'data-role': r, 'aria-pressed': 'false', title: label + ' · ' + K.name(K.user(DEMO_USERS[r])),
+      onClick: () => { if (!App.session || App.session.role !== r) App.login(DEMO_USERS[r]); } }, icon(ROLE_ICONS[r], 16), h('span', null, label));
+  }));
   const btn = (id, ic, label, onClick) => h('button', { class: 'demo-btn', type: 'button', id, onClick, 'aria-label': label, title: label }, icon(ic, 16), h('span', { class: 'lbl-txt', 'aria-hidden': 'true' }, label));
   bar.appendChild(h('span', { class: 'demo-tag' }, 'Démo'));
-  bar.appendChild(h('label', { for: 'demo-role' }, h('span', { class: 'lbl-txt' }, 'Rôle'), h('span', { class: 'sr-only' }, 'Changer de rôle'), roleSel));
+  bar.appendChild(h('span', { class: 'demo-lbl lbl-txt', 'aria-hidden': 'true' }, 'Voir en tant que'));
+  bar.appendChild(roles);
+  bar.appendChild(btn('demo-logout', 'logout', 'Se déconnecter', () => App.logout()));
   bar.appendChild(btn('demo-theme', 'moon', 'Thème sombre', () => App.setTheme(App.ui.theme === 'dark' ? 'light' : 'dark')));
   bar.appendChild(btn('demo-offline', 'wifiOff', 'Hors ligne', () => App.setOffline(!App.ui.offline)));
   bar.appendChild(btn('demo-saver', 'leaf', 'Économie de données', () => App.setDataSaver(!App.ui.dataSaver)));
@@ -682,8 +687,9 @@ function syncDemoBar() {
   set('demo-theme', App.ui.theme === 'dark');
   set('demo-offline', App.ui.offline);
   set('demo-saver', App.ui.dataSaver);
-  const sel = document.getElementById('demo-role');
-  if (sel) sel.value = App.session ? App.session.role : '';
+  Object.keys(DEMO_USERS).forEach((r) => set('demo-role-' + r, !!App.session && App.session.role === r));
+  const out = document.getElementById('demo-logout');
+  if (out) out.hidden = !App.session;
 }
 function toggleDemoBar(force) {
   App.ui.demoCollapsed = force !== undefined ? force : !App.ui.demoCollapsed;

@@ -5,8 +5,8 @@
 ## Lancer la maquette
 
 1. Double-cliquez sur `index.html`. Aucun serveur, aucune installation et aucune connexion Internet ne sont nécessaires.
-2. Utilisez la **barre de démo** en haut de l'écran :
-   - **Rôle** : Étudiant (Awa Ouédraogo), Enseignant (Dr Issouf Sawadogo), Scolarité (Mme Mariam Compaoré) ou Parent (M. Karim Ouédraogo). Le changement est immédiat, sans repasser par la connexion.
+2. **Entrez dans un espace en un clic** : les cartes « Entrer dans la démo » en haut des écrans Bienvenue et Connexion connectent directement (sans mot de passe ni code SMS). Ensuite, utilisez la **barre de démo** en haut de l’écran :
+   - **Voir en tant que** : 4 boutons Étudiant (Awa Ouédraogo), Enseignant (Dr Issouf Sawadogo), Scolarité (Mme Mariam Compaoré) et Parent (M. Karim Ouédraogo). Le changement est immédiat ; « Se déconnecter » revient à l’accueil.
    - **Thème sombre**, **Hors ligne** (bandeau « données de la dernière synchronisation ») et **Économie de données**.
    - **Réinitialiser la démo** : restaure les données de départ.
    - **Replier** : réduit la barre pendant une présentation.
@@ -25,7 +25,7 @@ Navigateurs testés : Chrome et Edge récents, en `file://` et en local. Sous Fi
 | 0:40 | Étudiant | **Tableau de bord** : prochain cours avec compte à rebours, alerte de paiement en retard, seuil d'absences proche, résultats du S3 (11,84 / 20, 24 crédits sur 30). |
 | 1:20 | Étudiant | **Notes** : UE en accordéon → ECUE ; Systèmes et réseaux « validée par compensation », Maths « non validée ». En bas, le **simulateur de moyenne** : bouton « Remplir avec mes moyennes de CC », puis modifier une note. |
 | 2:00 | Étudiant | **Paiements** → Payer la 2e tranche → Orange Money → confirmation sur le téléphone → reçu imprimable. |
-| 2:40 | Enseignant | **Faire l'appel** : « Tous présents », marquer un absent, essayer l'**appel par QR code** (code renouvelé toutes les 15 s), puis valider et verrouiller. |
+| 2:40 | Enseignant | **Faire l'appel** : « Tous présents », marquer un absent, puis valider et verrouiller. |
 | 3:15 | Enseignant | **Saisie des notes** (CC2 de Complexité) : saisie au clavier, cellule invalide en rouge (essayer `21`), statistiques et histogramme en direct, import CSV, puis soumission. |
 | 3:50 | Scolarité | **Validation des notes** → Valider : l'étudiante reçoit la note et une notification. **Délibérations** : décisions calculées, points de jury, PV imprimable. |
 | 4:30 | Scolarité | **Emplois du temps** : conflit de salle détecté en rouge, avec un bouton « Résoudre ». **Journal d'audit** : toutes les actions précédentes y sont tracées. |
@@ -39,7 +39,7 @@ Bascules à montrer pendant le parcours : **Économie de données**, **Hors lign
 2. **Paiement mobile intégré** (Orange Money, Moov Money) : reçus, relances SMS et rapprochement.
 3. **Notifications SMS** pour les étudiants peu connectés.
 4. **Économie de données** et **mode hors ligne**. La taille des fichiers est affichée.
-5. **Appel par QR code** et **simulateur de moyenne**.
+5. **Appel en un tap** (verrouillé après validation) et **simulateur de moyenne**.
 6. Interface sobre, pensée d'abord pour le mobile (barre de navigation en bas).
 7. **Journal d'audit** des notes, des points de jury et des rôles.
 
